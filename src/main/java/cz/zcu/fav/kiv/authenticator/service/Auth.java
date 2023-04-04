@@ -7,15 +7,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class Auth implements IAuth{
 
-    @Override
-    public ResponseEntity<String> signIn(User user) {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<String> signUp(User user) {
-        return null;
-    }
 
     @Override
     public ResponseEntity<String> validateJwt(User user, String token) {

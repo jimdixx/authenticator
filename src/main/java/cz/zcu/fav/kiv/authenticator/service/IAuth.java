@@ -5,10 +5,6 @@ import org.springframework.http.ResponseEntity;
 
 public interface IAuth {
 
-    ResponseEntity<String> signIn(User user);
-
-    ResponseEntity<String> signUp(User user);
-
     ResponseEntity<String> validateJwt(User user, String token);
 
     boolean authorized(User user);

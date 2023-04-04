@@ -14,15 +14,12 @@ public class AuthController {
     @Autowired
     private IAuth auth;
 
-    @PostMapping("/signIn")
+    @PostMapping("/createJwt")
     ResponseEntity<String> handleSingIn(@RequestBody User user) {
-        return null;
-    }
+        String token = auth.generateJwt(user);
 
-    @PostMapping("/signUp")
-    ResponseEntity<String> handleSignUp(@RequestBody User user) {
-        return null;
+        // situations
+        return ResponseEntity.ok().body(auth.generateJwt(user));
     }
-
 
 }
