@@ -7,8 +7,9 @@ public interface IAuth {
 
     ResponseEntity<String> validateJwt(User user, String token);
 
-    boolean authorized(User user);
+    String authorized(User user);
 
     String generateJwt(User user);
+
 
 }
