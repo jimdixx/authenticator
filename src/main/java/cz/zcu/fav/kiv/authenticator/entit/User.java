@@ -40,4 +40,11 @@ public class User {
     public String getName() {
         return name;
     }
+
+    public String getToken() {
+        return token;
+    }
+
+
+
 }

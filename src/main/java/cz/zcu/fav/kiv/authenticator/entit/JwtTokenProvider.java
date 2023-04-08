@@ -14,8 +14,9 @@ import java.util.UUID;
 @Component
 public class JwtTokenProvider {
 
-    private static final String JWT_SECRET = "private_key";
-
+    @Value("${secret.key}")
+    private String JWT_SECRET;
+    private static HashMap<String, Boolean> tokenMap = new HashMap<>();
     private static final long JWT_EXPIRATION = 30000L;
 
     public String generateToken(Authentication authentication) {

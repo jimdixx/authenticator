@@ -20,8 +20,8 @@ public class Auth implements IAuth {
 
 
     @Override
-    public ResponseEntity<String> validateJwt(User user, String token) {
-        return null;
+    public boolean validateJwt(String token) {
+        return jwtTokenProvider.validateToken(token);
     }
 
 

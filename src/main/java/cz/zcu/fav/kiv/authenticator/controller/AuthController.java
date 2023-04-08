@@ -20,17 +20,26 @@ public class AuthController {
     @PostMapping("/login")
     ResponseEntity<String> handleSingIn(@RequestBody User user) {
         String token = auth.generateJwt(user);
-
         // situations
-        return ResponseEntity.ok().body(auth.generateJwt(user));
+        return ResponseEntity.ok().body(token);
     }
 
     @PostMapping("/authenticate")
-    ResponseEntity<String> authenticate(@RequestBody User user) {
-//        String token = auth.authorized(user);
+    ResponseEntity<String> authenticate(@RequestHeader HttpHeaders headers) {
 
+        List<String> headersSet = headers.get("Authorization");
+        String token;
+        if (headersSet != null && !headersSet.get(0).isEmpty()) {
+            token = headersSet.get(0);
+            boolean isValid = auth.validateJwt(token);
+            if(isValid) {
+                return ResponseEntity.ok().body("{\"message\": \"OK\"}");
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\": \"Invalid token, please log in.\"}");
         // situations
-        return ResponseEntity.ok().body(auth.authorized(user));
+
     }
 
     @PostMapping("/logout")
