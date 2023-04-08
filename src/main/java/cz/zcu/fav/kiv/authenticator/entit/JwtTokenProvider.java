@@ -7,6 +7,8 @@ import com.sun.security.auth.UserPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.UUID;
 
 @Component
 public class JwtTokenProvider {
@@ -19,7 +21,12 @@ public class JwtTokenProvider {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         Date now = new Date();
         Date expirationDate = new Date(now.getTime() + JWT_EXPIRATION);
+        String randomId = UUID.randomUUID().toString();
+
+        tokenMap.put(randomId,true);
+
         return Jwts.builder()
+                .setId(randomId)
                 .setSubject(userPrincipal.getName())
                 .setIssuedAt(new Date())
                 .setExpiration(expirationDate)
@@ -27,15 +34,12 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public Authentication getAuthentication(String token) {
-        String userName = Jwts.parser()
+    public String getAuthentication(String token) {
+        return Jwts.parser()
                 .setSigningKey(JWT_SECRET)
                 .parseClaimsJws(token)
                 .getBody()
-                .getSubject();
-        UserPrincipal userPrincipal = new UserPrincipal(userName);
-        // TODO Get authorities or something like that? Do we need that?
-        return new UsernamePasswordAuthenticationToken(userPrincipal, "", null);
+                .getId();
     }
 
     public boolean validateToken(String token) {
@@ -55,5 +59,12 @@ public class JwtTokenProvider {
         }
         return false;
     }
+
+
+    public boolean invalidateToken(String token){
+        String uuid = getAuthentication(token);
+        return tokenMap.remove(uuid);
+    }
+
 
 }
