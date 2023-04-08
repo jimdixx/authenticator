@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 
 @Service
-public class Auth implements IAuth{
+public class Auth implements IAuth {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
@@ -24,10 +24,6 @@ public class Auth implements IAuth{
         return null;
     }
 
-    @Override
-    public String authorized(User user) {
-        return null;
-    }
 
     @Override
     public String generateJwt(User user) {

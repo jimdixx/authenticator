@@ -1,6 +1,7 @@
 package cz.zcu.fav.kiv.authenticator.entit;
 
 import io.jsonwebtoken.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import com.sun.security.auth.UserPrincipal;

@@ -5,11 +5,10 @@ import org.springframework.http.ResponseEntity;
 
 public interface IAuth {
 
-    ResponseEntity<String> validateJwt(User user, String token);
-
-    String authorized(User user);
+    boolean validateJwt(String token);
 
     String generateJwt(User user);
 
+    boolean logout(User user);
 
 }
