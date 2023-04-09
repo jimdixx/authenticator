@@ -24,17 +24,11 @@ public class AuthController {
         return ResponseEntity.ok().body(token);
     }
 
-    @PostMapping("/authenticate")
-    ResponseEntity<String> authenticate(@RequestHeader HttpHeaders headers) {
-
-        List<String> headersSet = headers.get("Authorization");
-        String token;
-        if (headersSet != null && !headersSet.get(0).isEmpty()) {
-            token = headersSet.get(0);
-            boolean isValid = auth.validateJwt(token);
-            if(isValid) {
-                return ResponseEntity.ok().body("{\"message\": \"OK\"}");
-            }
+    @PostMapping(value = "/authenticate", produces = "application/json")
+    ResponseEntity<String> authenticate(@RequestBody User user) {
+        boolean isValid = auth.validateJwt(user.getToken());
+        if(isValid) {
+            return ResponseEntity.ok().body("{\"message\": \"OK\"}");
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\": \"Invalid token, please log in.\"}");

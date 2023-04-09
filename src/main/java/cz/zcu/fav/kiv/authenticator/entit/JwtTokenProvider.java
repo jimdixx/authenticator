@@ -17,7 +17,7 @@ public class JwtTokenProvider {
     @Value("${secret.key}")
     private String JWT_SECRET;
     private static HashMap<String, Boolean> tokenMap = new HashMap<>();
-    private static final long JWT_EXPIRATION = 30000L;
+    private static final long JWT_EXPIRATION = 300000L;
 
     public String generateToken(Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
