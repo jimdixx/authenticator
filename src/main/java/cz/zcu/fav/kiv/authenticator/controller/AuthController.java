@@ -31,7 +31,7 @@ public class AuthController {
             return ResponseEntity.ok().body("{\"message\": \"OK\"}");
         }
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\": \"Invalid token, please log in.\"}");
+        return ResponseEntity.ok().body("{\"message\": \"Invalid token, please log in.\"}");
         // situations
 
     }
