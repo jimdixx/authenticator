@@ -36,7 +36,7 @@ public class AuthController {
 
     }
 
-    @PostMapping("/logout")
+    @PostMapping(value="/logout",produces = "application/json")
     ResponseEntity<String> logout(@RequestBody User user) {
         boolean loggedOut = auth.logout(user);
         String message;
