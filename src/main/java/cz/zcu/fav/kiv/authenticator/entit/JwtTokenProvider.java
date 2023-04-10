@@ -1,5 +1,6 @@
 package cz.zcu.fav.kiv.authenticator.entit;
 
+import cz.zcu.fav.kiv.authenticator.dials.UserModelStatusCodes;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -44,22 +45,30 @@ public class JwtTokenProvider {
                 .getId();
     }
 
-    public boolean validateToken(String token) {
+    public UserModelStatusCodes validateToken(String token) {
+        if(!tokenMap.containsKey(getAuthentication(token))) {
+            return UserModelStatusCodes.USER_TOKEN_INVALID;
+        }
+
         try {
             Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(token);
-            return true;
+            return UserModelStatusCodes.USER_TOKEN_VALID;
         } catch (SignatureException ex) {
             // invalid signature
+            return UserModelStatusCodes.USER_TOKEN_INVALID_SIGNATURE;
         } catch (MalformedJwtException ex) {
             // invalid token
+            return UserModelStatusCodes.USER_TOKEN_INVALID;
         } catch (ExpiredJwtException ex) {
             // expired token
+            return UserModelStatusCodes.USER_TOKEN_EXPIRED;
         } catch (UnsupportedJwtException ex) {
             // unsupported token
+            return UserModelStatusCodes.USER_TOKEN_UNSUPPORTED;
         } catch (IllegalArgumentException ex) {
             // token is empty or null
+            return UserModelStatusCodes.USER_TOKEN_EMPTY_OR_NULL;
         }
-        return false;
     }
 
     public String getNameFromToken(String token) {

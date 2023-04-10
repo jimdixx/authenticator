@@ -1,6 +1,7 @@
 package cz.zcu.fav.kiv.authenticator.service;
 
 import com.sun.security.auth.UserPrincipal;
+import cz.zcu.fav.kiv.authenticator.dials.UserModelStatusCodes;
 import cz.zcu.fav.kiv.authenticator.entit.JwtTokenProvider;
 import cz.zcu.fav.kiv.authenticator.entit.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class Auth implements IAuth {
 
 
     @Override
-    public boolean validateJwt(String token) {
+    public UserModelStatusCodes validateJwt(String token) {
         return jwtTokenProvider.validateToken(token);
     }
 

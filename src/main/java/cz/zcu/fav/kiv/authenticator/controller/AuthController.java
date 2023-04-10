@@ -18,7 +18,7 @@ import java.util.List;
 public class AuthController {
 
     @Autowired
-    private IAuth auth;
+    private IAuth oAuth;
 
     @PostMapping("/login")
     ResponseEntity<String> handleSingIn(@RequestBody User user) {
@@ -39,10 +39,11 @@ public class AuthController {
         /*
         UserModelStatusCodes isValid = auth.validateJwt(user.getToken());
         if(isValid) {
-            return ResponseEntity.ok().body("{\"message\": \"OK\"}");
+            String name = auth.getUserName(user.getToken());
+            return ResponseEntity.ok().body("{\"name\": \"" + name + "\"}");
         }
 
-        return ResponseEntity.ok().body("{\"message\": \"Invalid token, please log in.\"}");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
         // situations
         */
     }
@@ -54,7 +55,7 @@ public class AuthController {
      */
     @PostMapping(value="/logout",produces = "application/json")
     ResponseEntity<String> logout(@RequestBody User user) {
-        boolean loggedOut = auth.logout(user);
+        boolean loggedOut = oAuth.logout(user);
         HashMap<String,Object> json = new HashMap<>();
         if (loggedOut) {
             json.put("message","ok");

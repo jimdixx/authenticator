@@ -4,14 +4,12 @@ package cz.zcu.fav.kiv.authenticator.dials;
  * Enum for status codes
  */
 public enum UserModelStatusCodes {
-    INVALID_USER_ARGUMENTS("Invalid user arguments for registration",400),
-    USER_EXISTS("User exists",400),
-    HASH_FAILED("Error occurred while creating user",500),
-    USER_CREATED("User successfully created",201),
-    USER_LOGGED_IN("User logged in successfully",200),
-    USER_LOGIN_FAILED("User login failed",401),
-    USER_CREATION_FAILED("Error occurred while creating user",503),
-    USER_LOGGED_OUT("User logged out.",200);
+    USER_TOKEN_VALID("User authorize",200),
+    USER_TOKEN_INVALID_SIGNATURE("User token has invalid signature",401),
+    USER_TOKEN_INVALID("User token is invalid",401),
+    USER_TOKEN_EXPIRED("User token is expired",401),
+    USER_TOKEN_UNSUPPORTED("User token is unsupported",401),
+    USER_TOKEN_EMPTY_OR_NULL("User token is empty or null",401);
 
     private final String label;
     private final int statusCode;
