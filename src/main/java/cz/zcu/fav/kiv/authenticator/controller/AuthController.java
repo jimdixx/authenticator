@@ -22,21 +22,29 @@ public class AuthController {
 
     @PostMapping("/login")
     ResponseEntity<String> handleSingIn(@RequestBody User user) {
-        String token = auth.generateJwt(user);
-        // situations
-        return this.getResponseEntity(UserModelStatusCodes.USER_LOGGED_IN, token, "");
+        String token = oAuth.generateJwt(user);
+        return ResponseEntity.ok().body(token);
     }
 
     @PostMapping(value = "/authenticate", produces = "application/json")
-    ResponseEntity<String> authenticate(@RequestHeader HttpHeaders headers, @RequestBody User user) {
-        boolean isValid = auth.validateJwt(user.getToken());
+    ResponseEntity<String> authenticate(@RequestHeader HttpHeaders headers) {
+        final String authHeader = headers.getFirst(HttpHeaders.AUTHORIZATION);
+        if(authHeader == null || !authHeader.startsWith("Bearer")){
+            //chyba
+        }
+        final String token = authHeader.substring(7);
+        String name = oAuth.getUserName(token);
+        UserModelStatusCodes isValid = oAuth.validateJwt(token);
+        return ResponseEntity.status(HttpStatus.valueOf(isValid.getStatusCode())).body(name);
+        /*
+        UserModelStatusCodes isValid = auth.validateJwt(user.getToken());
         if(isValid) {
             return ResponseEntity.ok().body("{\"message\": \"OK\"}");
         }
 
         return ResponseEntity.ok().body("{\"message\": \"Invalid token, please log in.\"}");
         // situations
-
+        */
     }
 
     /**
@@ -58,31 +66,5 @@ public class AuthController {
         return ResponseEntity.internalServerError().body(jsonString);
     }
 
-    /**
-     * Method to create response
-     *
-     * @param statusCode UserModelStatusCodes code
-     * @return ResponseEntity with code and msg
-     */
-    private ResponseEntity<String> getResponseEntity(UserModelStatusCodes statusCode, String jwtToken, String body) {
-        body += "," + generateResponseObject(statusCode, jwtToken);
-        int code = statusCode.getStatusCode();
-        ResponseEntity<String> response = new ResponseEntity<>(body, HttpStatus.valueOf(code));
-        return response;
-    }
-
-    /**
-     * Method to create JSON object
-     *
-     * @param code UserModelStatusCodes code
-     * @return String that represents JSON object
-     */
-    private String generateResponseObject(UserModelStatusCodes code, String jwtToken) {
-        HashMap<String, Object> json = new HashMap<>();
-        if (jwtToken != null) {
-            json.put("jwtToken", jwtToken);
-        }
-        return JSONBuilder.buildJSON(json);
-    }
 
 }

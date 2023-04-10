@@ -36,7 +36,7 @@ public class Auth implements IAuth {
     @Override
     public boolean logout(User user){
         String token = user.getToken();
-        if(token != null && !token.isEmpty()){
+        if(token == null && token.isEmpty()){
             return false;
         }
         return jwtTokenProvider.invalidateToken(token);
