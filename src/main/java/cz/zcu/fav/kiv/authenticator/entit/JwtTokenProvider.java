@@ -62,6 +62,14 @@ public class JwtTokenProvider {
         return false;
     }
 
+    public String getNameFromToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(JWT_SECRET)
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
 
     public boolean invalidateToken(String token){
         String uuid = getAuthentication(token);

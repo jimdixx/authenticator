@@ -42,4 +42,10 @@ public class Auth implements IAuth {
         return jwtTokenProvider.invalidateToken(token);
     }
 
+
+    @Override
+    public String getUserName(String token) {
+        return jwtTokenProvider.getNameFromToken(token);
+    }
+
 }
