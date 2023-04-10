@@ -28,7 +28,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/authenticate", produces = "application/json")
-    ResponseEntity<String> authenticate(@RequestBody User user) {
+    ResponseEntity<String> authenticate(@RequestHeader HttpHeaders headers, @RequestBody User user) {
         boolean isValid = auth.validateJwt(user.getToken());
         if(isValid) {
             return ResponseEntity.ok().body("{\"message\": \"OK\"}");
@@ -39,16 +39,23 @@ public class AuthController {
 
     }
 
+    /**
+     *
+     * @param user
+     * @return
+     */
     @PostMapping(value="/logout",produces = "application/json")
     ResponseEntity<String> logout(@RequestBody User user) {
         boolean loggedOut = auth.logout(user);
-        String message;
+        HashMap<String,Object> json = new HashMap<>();
         if (loggedOut) {
-            message = "{\"message\": \"OK\"}";
-            return ResponseEntity.ok().body(message);
+            json.put("message","ok");
+            String jsonString = JSONBuilder.buildJSON(json);
+            return ResponseEntity.ok().body(jsonString);
         }
-        message = "{\"message\": \"Unknown error\"}";
-        return ResponseEntity.internalServerError().body(message);
+        json.put("message","Internal error");
+        String jsonString = JSONBuilder.buildJSON(json);
+        return ResponseEntity.internalServerError().body(jsonString);
     }
 
     /**
