@@ -79,7 +79,6 @@ public class JwtTokenProvider {
                 .getSubject();
     }
 
-
     public boolean invalidateToken(String token){
         String uuid = getAuthentication(token);
         return tokenMap.remove(uuid);
