@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,7 +28,7 @@ public class AuthTest {
     public void logouttest() {
         when(jwtTokenProvider.invalidateToken(any())).thenReturn(true);
 
-        boolean done = auth.logout(new User("test", "token"));
+        ResponseEntity<String> done = auth.logout(new User("test", "token"));
 
         assertEquals(true, done);
     }

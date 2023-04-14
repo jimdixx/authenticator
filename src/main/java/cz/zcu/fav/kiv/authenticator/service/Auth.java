@@ -1,51 +1,94 @@
 package cz.zcu.fav.kiv.authenticator.service;
 
 import com.sun.security.auth.UserPrincipal;
-import cz.zcu.fav.kiv.authenticator.dials.UserModelStatusCodes;
+import cz.zcu.fav.kiv.authenticator.dials.StatusCodes;
 import cz.zcu.fav.kiv.authenticator.entit.JwtTokenProvider;
 import cz.zcu.fav.kiv.authenticator.entit.User;
+import cz.zcu.fav.kiv.authenticator.utils.JSONBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
+import java.util.HashMap;
 
+/**
+ * OAuth service
+ * @version 1.0
+ * @author Petr Urban, Jiri Trefil, Vaclav Hrabik
+ */
 @Service
 public class Auth implements IAuth {
 
+    /**
+     * Class which manage JWT token
+     */
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-
+    /**
+     * Method to call validation of JWT token
+     * @param authHeader    header of request for authentication
+     * @return              ResponseEntity<String>
+     *                          200 + MSG   - token is ok
+     *                          401         - token is in valid
+     */
     @Override
-    public UserModelStatusCodes validateJwt(String token) {
-        return jwtTokenProvider.validateToken(token);
+    public ResponseEntity<String> validateJwt(String authHeader) {
+        final String token = authHeader.substring(7);
+        String name = jwtTokenProvider.getNameFromToken(token);
+        if (name == null) {
+            return ResponseEntity.status(HttpStatus.valueOf(StatusCodes.USER_TOKEN_INVALID.getStatusCode()))
+                    .body(StatusCodes.USER_TOKEN_INVALID.getLabel());
+        }
+        StatusCodes isValid = jwtTokenProvider.validateToken(token);
+        return ResponseEntity.status(HttpStatus.valueOf(isValid.getStatusCode())).body(name);
     }
 
-
+    /**
+     * Method to call generation of new JWT token
+     * @param user  User who wants to login
+     * @return      ResponseEntity<String>
+     *                  200 + token     - if everything is ok
+     *                  401             - token creation failed
+     */
     @Override
-    public String generateJwt(User user) {
+    public ResponseEntity<String> generateJwt(User user) {
         UserPrincipal userPrincipal = new UserPrincipal(user.getName());
         Authentication authentication = new UsernamePasswordAuthenticationToken(userPrincipal, "", null);
-        return jwtTokenProvider.generateToken(authentication);
-    }
-
-
-    @Override
-    public boolean logout(User user){
-        String token = user.getToken();
-        if(token == null && token.isEmpty()){
-            return false;
+        String token = jwtTokenProvider.generateToken(authentication);
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.valueOf(StatusCodes.TOKEN_CREATION_FAILED.getStatusCode()))
+                    .body(StatusCodes.TOKEN_CREATION_FAILED.getLabel());
         }
-        return jwtTokenProvider.invalidateToken(token);
+        return ResponseEntity.ok().body(token);
     }
 
+    /**
+     * Method to call invalidation of users JWT token
+     * @param user  User who wants to logout
+     * @return      ResponseEntity<String>
+     *                  200 + username      - if everything is ok
+     *                  400                 - something went wrong with token
+     */
     @Override
-    public String getUserName(String token) {
-        return jwtTokenProvider.getNameFromToken(token);
+    public ResponseEntity<String> logout(User user){
+        String token = user.getToken();
+        HashMap<String,Object> json = new HashMap<>();
+        String MSG = "Message";
+        if(token == null && token.isEmpty()){
+            json.put(MSG, StatusCodes.USER_LOGOUT_FAILED.getLabel());
+            String jsonString = JSONBuilder.buildJSON(json);
+            return ResponseEntity.status(HttpStatus.valueOf(StatusCodes.USER_LOGOUT_FAILED.getStatusCode()))
+                    .body(jsonString);
+        }
+        jwtTokenProvider.invalidateToken(token);
+        json.put(MSG, StatusCodes.USER_LOGGED_OUT.getLabel());
+        String jsonString = JSONBuilder.buildJSON(json);
+        return ResponseEntity.status(HttpStatus.valueOf(StatusCodes.USER_LOGGED_OUT.getStatusCode()))
+                .body(jsonString);
     }
 
 }
