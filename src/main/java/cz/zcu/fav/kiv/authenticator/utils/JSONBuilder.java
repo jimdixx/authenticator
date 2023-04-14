@@ -33,7 +33,7 @@ public class JSONBuilder {
  * @return String representation of JSON object
  * */
 
-    public static String buildJSON(HashMap<String,Object> json){
+    public static String buildJSON(Map<String,Object> json){
 
         JSONObject jsonObject = new JSONObject();
         for(String key : json.keySet()){
