@@ -1,71 +1,86 @@
 package cz.zcu.fav.kiv.authenticator.controller;
 
-import cz.zcu.fav.kiv.authenticator.dials.UserModelStatusCodes;
+import cz.zcu.fav.kiv.authenticator.dials.StatusCodes;
 import cz.zcu.fav.kiv.authenticator.entit.User;
 import cz.zcu.fav.kiv.authenticator.service.IAuth;
-import cz.zcu.fav.kiv.authenticator.utils.JSONBuilder;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-
+/**
+ * Endpoints of authenticator application
+ * @version 1.0
+ * @author Petr Urban, Jiri Trefil, Vaclav Hrabik
+ */
 @RestController
 public class AuthController {
 
+    /**
+     * Instance of oAuth service
+     */
     @Autowired
     private IAuth oAuth;
 
+    /**
+     * endpoint for login user
+     * @param user  user with name
+     * @return      ResponseEntity<String>
+     *                  200 + token     - if everything is ok
+     *                  401             - token creation failed
+     */
     @PostMapping("/login")
     ResponseEntity<String> handleSingIn(@RequestBody User user) {
-        String token = oAuth.generateJwt(user);
-        return ResponseEntity.ok().body(token);
-    }
-
-    @PostMapping(value = "/authenticate", produces = "application/json")
-    ResponseEntity<String> authenticate(@RequestHeader HttpHeaders headers) {
-        final String authHeader = headers.getFirst(HttpHeaders.AUTHORIZATION);
-        if(authHeader == null || !authHeader.startsWith("Bearer")){
-            //chyba
-        }
-        final String token = authHeader.substring(7);
-        String name = oAuth.getUserName(token);
-        UserModelStatusCodes isValid = oAuth.validateJwt(token);
-        return ResponseEntity.status(HttpStatus.valueOf(isValid.getStatusCode())).body(name);
-        /*
-        UserModelStatusCodes isValid = auth.validateJwt(user.getToken());
-        if(isValid) {
-            String name = auth.getUserName(user.getToken());
-            return ResponseEntity.ok().body("{\"name\": \"" + name + "\"}");
-        }
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
-        // situations
-        */
+        return oAuth.generateJwt(user.getName(), false);
     }
 
     /**
-     *
-     * @param user
-     * @return
+     * endpoint for authentication of user
+     * @param headers   request with "Authorization" key and "Bearer token" as value in header
+     * @return          ResponseEntity<String>
+     *                      200 + MSG   - token is ok
+     *                      401         - token is in valid
+     */
+    @PostMapping(value = "/authenticate", produces = "application/json")
+    ResponseEntity<String> authenticate(@RequestHeader HttpHeaders headers) {
+        final String authHeader = headers.getFirst(HttpHeaders.AUTHORIZATION);
+        if(authHeader == null || !authHeader.startsWith("Bearer")) {
+            //chyba
+            return ResponseEntity.status(HttpStatus.valueOf(StatusCodes.USER_LOGOUT_FAILED.getStatusCode()))
+                    .body(StatusCodes.USER_LOGOUT_FAILED.getLabel());
+        }
+        return oAuth.validateJwt(authHeader);
+    }
+
+    /**
+     * endpoint of logout the user
+     * @param user  user with token
+     * @return      ResponseEntity<String>
+     *                  200 + username      - if everything is ok
+     *                  400                 - something went wrong with token
      */
     @PostMapping(value="/logout",produces = "application/json")
     ResponseEntity<String> logout(@RequestBody User user) {
-        boolean loggedOut = oAuth.logout(user);
-        HashMap<String,Object> json = new HashMap<>();
-        if (loggedOut) {
-            json.put("message","ok");
-            String jsonString = JSONBuilder.buildJSON(json);
-            return ResponseEntity.ok().body(jsonString);
-        }
-        json.put("message","Internal error");
-        String jsonString = JSONBuilder.buildJSON(json);
-        return ResponseEntity.internalServerError().body(jsonString);
+
+        return oAuth.logout(user);
     }
 
+    @GetMapping(value = "/refresh", produces = "application/json")
+    ResponseEntity<String> refreshToken(@RequestHeader HttpHeaders headers) {
+        //vytahnu token
+        //validace tokenu
+        //vytahnu username z tela tokenu
+        //vygeneruju novej token s delsi zivotnosti
+        //poslu uzivateli
+
+
+
+        return oAuth.refreshToken(headers);
+    }
 
 }
