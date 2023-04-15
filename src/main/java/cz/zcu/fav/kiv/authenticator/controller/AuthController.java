@@ -3,6 +3,10 @@ package cz.zcu.fav.kiv.authenticator.controller;
 import cz.zcu.fav.kiv.authenticator.dials.StatusCodes;
 import cz.zcu.fav.kiv.authenticator.entit.User;
 import cz.zcu.fav.kiv.authenticator.service.IAuth;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -12,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 /**
  * Endpoints of authenticator application
  * @version 1.0
- * @author Petr Uerban, Jiri Trefil, Vaclav Hrabik
+ * @author Petr Urban, Jiri Trefil, Vaclav Hrabik
  */
 @RestController
 public class AuthController {
@@ -32,7 +36,7 @@ public class AuthController {
      */
     @PostMapping("/login")
     ResponseEntity<String> handleSingIn(@RequestBody User user) {
-        return oAuth.generateJwt(user);
+        return oAuth.generateJwt(user.getName(), false);
     }
 
     /**
@@ -65,5 +69,17 @@ public class AuthController {
         return oAuth.logout(user);
     }
 
+    @GetMapping(value = "/refresh", produces = "application/json")
+    ResponseEntity<String> refreshToken(@RequestHeader HttpHeaders headers) {
+        //vytahnu token
+        //validace tokenu
+        //vytahnu username z tela tokenu
+        //vygeneruju novej token s delsi zivotnosti
+        //poslu uzivateli
+
+
+
+        return oAuth.refreshToken(headers);
+    }
 
 }

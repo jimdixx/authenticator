@@ -38,10 +38,10 @@ public class JwtTokenProvider {
      * @param authentication    wrapper of user credentials
      * @return                  JWT token as string
      */
-    public String generateToken(Authentication authentication) {
+    public String generateToken(Authentication authentication, boolean refreshToken) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         Date now = new Date();
-        Date expirationDate = new Date(now.getTime() + JWT_EXPIRATION);
+        Date expirationDate = new Date(now.getTime() + (refreshToken ? JWT_EXPIRATION_EXTENDED : JWT_EXPIRATION));
         String randomId = UUID.randomUUID().toString();
 
         tokenMap.put(randomId,true);

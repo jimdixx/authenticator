@@ -11,8 +11,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpHeaders;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * OAuth service
@@ -27,6 +32,35 @@ public class Auth implements IAuth {
      */
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
+
+    @Override
+    public ResponseEntity<String> refreshToken(HttpHeaders headers) {
+        List<String> authHeaders = headers.get(HttpHeaders.AUTHORIZATION);
+
+        if (authHeaders == null || authHeaders.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.valueOf(StatusCodes.USER_TOKEN_INVALID.getStatusCode())).build();
+        }
+
+        // TODO >> findFirst throws exception, we do not want this shit guys. (:
+        Optional<String> bearerToken = authHeaders.stream()
+                    .filter(header -> header.startsWith("Bearer "))
+                    .findFirst();
+
+
+        if (bearerToken.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.valueOf(StatusCodes.USER_TOKEN_INVALID.getStatusCode())).build();
+        }
+
+        String token = bearerToken.get().replace("Bearer ", "");
+        String userName = jwtTokenProvider.getNameFromToken(token);
+        boolean invalidated = jwtTokenProvider.invalidateToken(token);
+
+        if(userName != null && invalidated) {
+            return generateJwt(userName,true);
+        }
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
 
     /**
      * Method to call validation of JWT token
@@ -55,10 +89,10 @@ public class Auth implements IAuth {
      *                  401             - token creation failed
      */
     @Override
-    public ResponseEntity<String> generateJwt(User user) {
-        UserPrincipal userPrincipal = new UserPrincipal(user.getName());
+    public ResponseEntity<String> generateJwt(String userName, boolean refreshToken) {
+        UserPrincipal userPrincipal = new UserPrincipal(userName);
         Authentication authentication = new UsernamePasswordAuthenticationToken(userPrincipal, "", null);
-        String token = jwtTokenProvider.generateToken(authentication);
+        String token = jwtTokenProvider.generateToken(authentication, refreshToken);
         if (token == null) {
             return ResponseEntity.status(HttpStatus.valueOf(StatusCodes.TOKEN_CREATION_FAILED.getStatusCode()))
                     .body(StatusCodes.TOKEN_CREATION_FAILED.getLabel());
@@ -68,7 +102,7 @@ public class Auth implements IAuth {
 
     /**
      * Method to call invalidation of users JWT token
-     * @param user  User who wants to logout
+     * @param user  User who wants to log out
      * @return      ResponseEntity<String>
      *                  200 + username      - if everything is ok
      *                  400                 - something went wrong with token
@@ -78,7 +112,7 @@ public class Auth implements IAuth {
         String token = user.getToken();
         HashMap<String,Object> json = new HashMap<>();
         String MSG = "Message";
-        if(token == null && token.isEmpty()){
+        if(token == null || token.isEmpty()){
             json.put(MSG, StatusCodes.USER_LOGOUT_FAILED.getLabel());
             String jsonString = JSONBuilder.buildJSON(json);
             return ResponseEntity.status(HttpStatus.valueOf(StatusCodes.USER_LOGOUT_FAILED.getStatusCode()))
