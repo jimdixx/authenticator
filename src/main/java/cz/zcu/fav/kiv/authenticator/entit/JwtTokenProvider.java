@@ -34,6 +34,10 @@ public class JwtTokenProvider {
     private static final long JWT_EXPIRATION = 300000L;
 
     /**
+     * Life spawn of refreshed token, 1 hour
+     */
+    private static final long JWT_EXPIRATION_EXTENDED = 3600000L;
+    /**
      * method to generate JWT token from username
      * @param authentication    wrapper of user credentials
      * @return                  JWT token as string
@@ -144,14 +148,14 @@ public class JwtTokenProvider {
     }
 
     /**
-     * method make token invalid -> user is logged out
+     * Method makes token invalid
      * @param token JWT token of user who wants to be logged out
-     * @return      true    - if token is valid
-     *              false   - if token is invalid
+     * @return      true    - if token was successfully invalidated
+     *              false   - if token in invalid or non existant
      */
     public boolean invalidateToken(String token){
         String uuid = getAuthentication(token);
-        if (uuid == null) {
+        if (uuid == null || !tokenMap.containsKey(uuid)) {
             return false;
         }
         return tokenMap.remove(uuid);

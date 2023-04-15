@@ -83,7 +83,7 @@ public class Auth implements IAuth {
 
     /**
      * Method to call generation of new JWT token
-     * @param user  User who wants to login
+     * @param userName name of the user that logged in and requires token
      * @return      ResponseEntity<String>
      *                  200 + token     - if everything is ok
      *                  401             - token creation failed
