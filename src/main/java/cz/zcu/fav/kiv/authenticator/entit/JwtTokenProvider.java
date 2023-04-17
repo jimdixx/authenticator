@@ -31,12 +31,12 @@ public class JwtTokenProvider {
     /**
      * Life spawn of token, now 5 min
      */
-    private static final long JWT_EXPIRATION = 300000L;
+    private static final long JWT_EXPIRATION = 300_000L; // 300 sec = 5 min
 
     /**
      * Life spawn of refreshed token, 1 hour
      */
-    private static final long JWT_EXPIRATION_EXTENDED = 3600000L;
+    private static final long JWT_EXPIRATION_EXTENDED = 3_600_000L; // 3600 sec = 60 min
     /**
      * method to generate JWT token from username
      * @param authentication    wrapper of user credentials
