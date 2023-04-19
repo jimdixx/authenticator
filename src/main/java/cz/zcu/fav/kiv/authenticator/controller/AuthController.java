@@ -69,16 +69,15 @@ public class AuthController {
         return oAuth.logout(user);
     }
 
+    /**
+     * endpoint to get token with long lifespan
+     * @param headers   header of request with token
+     * @return          ResponseEntity<String>
+     *                      200 + new token   - if everything is ok
+     *                      401               - send token is in valid
+     */
     @GetMapping(value = "/refresh", produces = "application/json")
     ResponseEntity<String> refreshToken(@RequestHeader HttpHeaders headers) {
-        //vytahnu token
-        //validace tokenu
-        //vytahnu username z tela tokenu
-        //vygeneruju novej token s delsi zivotnosti
-        //poslu uzivateli
-
-
-
         return oAuth.refreshToken(headers);
     }
 
