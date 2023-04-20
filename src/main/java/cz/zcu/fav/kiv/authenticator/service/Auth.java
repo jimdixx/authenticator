@@ -33,29 +33,33 @@ public class Auth implements IAuth {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    /**
+     * Method to call validation of JWT token
+     * @param headers       header of request for authentication
+     * @return              ResponseEntity<String>
+     *                          200 + MSG   - token is ok
+     *                          401         - token is in valid
+     */
     @Override
     public ResponseEntity<String> refreshToken(HttpHeaders headers) {
-        List<String> authHeaders = headers.get(HttpHeaders.AUTHORIZATION);
+        //vytahnu token
 
-        if (authHeaders == null || authHeaders.isEmpty()) {
+        String authHeaders = headers.getFirst(HttpHeaders.AUTHORIZATION);
+
+        //validace tokenu
+        if (authHeaders == null) {
             return ResponseEntity.status(HttpStatus.valueOf(StatusCodes.USER_TOKEN_INVALID.getStatusCode())).build();
         }
-
-        // TODO >> findFirst throws exception, we do not want this shit guys. (:
-        Optional<String> bearerToken = authHeaders.stream()
-                    .filter(header -> header.startsWith("Bearer "))
-                    .findFirst();
-
-
-        if (bearerToken.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.valueOf(StatusCodes.USER_TOKEN_INVALID.getStatusCode())).build();
-        }
-
-        String token = bearerToken.get().replace("Bearer ", "");
-        String userName = jwtTokenProvider.getNameFromToken(token);
+        String token = authHeaders.replace("Bearer ", "");
         boolean invalidated = jwtTokenProvider.invalidateToken(token);
 
+        //vytahnu username z tela tokenu
+        String userName = jwtTokenProvider.getNameFromToken(token);
+
+
         if(userName != null && invalidated) {
+            //vygeneruju novej token s delsi zivotnosti
+            //poslu uzivateli
             return generateJwt(userName,true);
         }
 
