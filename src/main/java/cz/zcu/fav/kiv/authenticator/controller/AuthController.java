@@ -51,9 +51,9 @@ public class AuthController {
     ResponseEntity<String> authenticate(@RequestHeader HttpHeaders headers) {
         final String authHeader = headers.getFirst(HttpHeaders.AUTHORIZATION);
         if(authHeader == null || !authHeader.startsWith("Bearer")) {
-            //chyba
-            return ResponseEntity.status(HttpStatus.valueOf(StatusCodes.USER_LOGOUT_FAILED.getStatusCode()))
-                    .body(StatusCodes.USER_LOGOUT_FAILED.getLabel());
+            //user request does not have authorization-bearer key value pair - kill it
+            return ResponseEntity.status(HttpStatus.valueOf(StatusCodes.USER_TOKEN_INVALID.getStatusCode()))
+                    .body(StatusCodes.USER_TOKEN_INVALID.getLabel());
         }
         return oAuth.validateJwt(authHeader);
     }

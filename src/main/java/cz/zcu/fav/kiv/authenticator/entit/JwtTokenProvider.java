@@ -30,7 +30,7 @@ public class JwtTokenProvider {
     /**
      * Collection of all active tokens (valid and invalid ones)
      */
-    private static final Map<String, Boolean> tokenMap = new HashMap<>();
+    private static final Map<String, Date> tokenMap = new HashMap<>();
     /**
      * Life spawn of token, now 5 min
      */
@@ -50,17 +50,42 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expirationDate = new Date(now.getTime() + (refreshToken ? JWT_EXPIRATION_EXTENDED : JWT_EXPIRATION));
         String randomId = UUID.randomUUID().toString();
-
-        tokenMap.put(randomId,true);
+        addTokenToMap(randomId,expirationDate);
 
         return Jwts.builder()
                 .setId(randomId)
                 .setSubject(userPrincipal.getName())
-                .setIssuedAt(new Date())
+                .setIssuedAt(now)
                 .setExpiration(expirationDate)
                 .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
                 .compact();
     }
+
+    /**
+     * Method accessed from TokenRemovalScheduler that removes all tokens which are outdated
+     * The monitor adds quite a lot of overhead to code execution - should not be called too often
+     */
+    public static synchronized void removeExpiredTokens(){
+        Date now = new Date();
+        for(String token:tokenMap.keySet()){
+            Date tokenDate = tokenMap.get(token);
+            //token is expired - remove it from map
+            if(now.after(tokenDate))
+                tokenMap.remove(token);
+        }
+
+    }
+    private synchronized boolean removeTokenFromMap(String uuid){
+        if(!tokenMap.containsKey(uuid)) return false;
+        tokenMap.remove(uuid);
+        return true;
+    }
+    private synchronized boolean addTokenToMap(String uuid, Date expirationDate){
+        if(tokenMap.containsKey(uuid))return false;
+        tokenMap.put(uuid,expirationDate);
+        return true;
+    }
+
 
     /**
      * internal method for get key to collection of active token
@@ -160,7 +185,8 @@ public class JwtTokenProvider {
         if (uuid == null || !tokenMap.containsKey(uuid)) {
             return false;
         }
-        return tokenMap.remove(uuid);
+        removeTokenFromMap(uuid);
+        return true;
     }
 
 

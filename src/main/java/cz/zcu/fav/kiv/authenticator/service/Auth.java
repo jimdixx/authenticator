@@ -82,7 +82,8 @@ public class Auth implements IAuth {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
         }
         StatusCodes isValid = jwtTokenProvider.validateToken(token);
-        json.put("message",name);
+
+        json.put("message",isValid.getLabel());
         String body = JSONBuilder.buildJSON(json);
         return ResponseEntity.status(HttpStatus.valueOf(isValid.getStatusCode())).body(body);
     }
@@ -107,6 +108,8 @@ public class Auth implements IAuth {
     }
 
     /**
+     * TODO [JT] mozna prepsat status code? Vracet 400 na absenci tokenu v userovi je spise na 401 - nekdo zkousi
+     * TODO neco nekaleho, nebo je neco blbe na strane SPADEu
      * Method to call invalidation of users JWT token
      * @param user  User who wants to log out
      * @return      ResponseEntity<String>
