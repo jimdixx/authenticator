@@ -13,10 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpHeaders;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -77,12 +74,17 @@ public class Auth implements IAuth {
     public ResponseEntity<String> validateJwt(String authHeader) {
         final String token = authHeader.substring(7);
         String name = jwtTokenProvider.getNameFromToken(token);
+        Map<String,Object> json = new HashMap<>();
+
         if (name == null) {
-            return ResponseEntity.status(HttpStatus.valueOf(StatusCodes.USER_TOKEN_INVALID.getStatusCode()))
-                    .body(StatusCodes.USER_TOKEN_INVALID.getLabel());
+            json.put("message",StatusCodes.USER_TOKEN_INVALID.getLabel());
+            String body = JSONBuilder.buildJSON(json);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
         }
         StatusCodes isValid = jwtTokenProvider.validateToken(token);
-        return ResponseEntity.status(HttpStatus.valueOf(isValid.getStatusCode())).body(name);
+        json.put("message",name);
+        String body = JSONBuilder.buildJSON(json);
+        return ResponseEntity.status(HttpStatus.valueOf(isValid.getStatusCode())).body(body);
     }
 
     /**

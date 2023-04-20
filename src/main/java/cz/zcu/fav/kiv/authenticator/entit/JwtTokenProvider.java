@@ -1,6 +1,8 @@
 package cz.zcu.fav.kiv.authenticator.entit;
 
+import cz.zcu.fav.kiv.authenticator.dials.JwtExceptionStatus;
 import cz.zcu.fav.kiv.authenticator.dials.StatusCodes;
+import cz.zcu.fav.kiv.authenticator.jwtException.JwtException;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -8,6 +10,7 @@ import com.sun.security.auth.UserPrincipal;
 import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -27,7 +30,7 @@ public class JwtTokenProvider {
     /**
      * Collection of all active tokens (valid and invalid ones)
      */
-    private static final HashMap<String, Boolean> tokenMap = new HashMap<>();
+    private static final Map<String, Boolean> tokenMap = new HashMap<>();
     /**
      * Life spawn of token, now 5 min
      */
@@ -70,7 +73,7 @@ public class JwtTokenProvider {
 
         try {
             id = parserJWTToken(token).getBody().getId();
-        } catch (Exception e) {
+        } catch (JwtException e) {
             return null;
         }
         return id;
@@ -98,7 +101,7 @@ public class JwtTokenProvider {
         try {
             parserJWTToken(token);
             return StatusCodes.USER_TOKEN_VALID;
-        } catch (Exception e) {
+        } catch (JwtException e) {
             // invalid signature
             return StatusCodes.USER_TOKEN_INVALID;
         }
@@ -110,24 +113,23 @@ public class JwtTokenProvider {
      * @return              parsed token
      * @throws Exception    generic exception - everytime it must be handled differently
      */
-    public Jws<Claims> parserJWTToken(String token) throws Exception {
+    public Jws<Claims> parserJWTToken(String token) throws JwtException {
+        //no token is provided
+        if(token == null || token.length() == 0)return null;
         try {
             return Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(token);
         } catch (SignatureException ex) {
             // invalid signature
-            throw new Exception();
+            throw new JwtException(JwtExceptionStatus.INVALID_SIGNATURE);
         } catch (MalformedJwtException ex) {
             // invalid token
-            throw new Exception();
+            throw new JwtException(JwtExceptionStatus.INVALID_TOKEN);
         } catch (ExpiredJwtException ex) {
             // expired token
-            throw new Exception();
+            throw new JwtException(JwtExceptionStatus.EXPIRED_TOKEN);
         } catch (UnsupportedJwtException ex) {
             // unsupported token
-            throw new Exception();
-        } catch (IllegalArgumentException ex) {
-            // token is empty or null
-            throw new Exception();
+            throw new JwtException(JwtExceptionStatus.UNSUPPORTED_TOKEN);
         }
     }
 
@@ -141,7 +143,7 @@ public class JwtTokenProvider {
         String name;
         try {
              name = parserJWTToken(token).getBody().getSubject();
-        } catch (Exception e) {
+        } catch (JwtException e) {
             return null;
         }
         return name;

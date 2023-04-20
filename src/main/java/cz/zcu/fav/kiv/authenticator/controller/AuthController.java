@@ -10,6 +10,7 @@ import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,7 +47,7 @@ public class AuthController {
      *                      200 + MSG   - token is ok
      *                      401         - token is in valid
      */
-    @PostMapping(value = "/authenticate", produces = "application/json")
+    @PostMapping(value = "/authenticate", produces =  MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<String> authenticate(@RequestHeader HttpHeaders headers) {
         final String authHeader = headers.getFirst(HttpHeaders.AUTHORIZATION);
         if(authHeader == null || !authHeader.startsWith("Bearer")) {
