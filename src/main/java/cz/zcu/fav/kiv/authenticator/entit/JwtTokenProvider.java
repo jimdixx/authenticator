@@ -32,9 +32,9 @@ public class JwtTokenProvider {
      */
     private static final Map<String, Date> tokenMap = new HashMap<>();
     /**
-     * Life spawn of token, now 5 min
+     * Life spawn of token, now 15 min
      */
-    private static final long JWT_EXPIRATION = 300_000L; // 300 sec = 5 min
+    private static final long JWT_EXPIRATION = 900_000L; // 900 sec = 15 min
 
     /**
      * Life spawn of refreshed token, 1 hour
